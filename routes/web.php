@@ -14,3 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+// 初期表示
+Route::get('/kiji', 'KijiToolController@index');
+// 計算ボタン押下処理
+Route::post('/kiji_calc', 'KijiToolController@calc');
