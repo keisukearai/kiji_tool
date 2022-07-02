@@ -24,11 +24,12 @@ class KijiToolController extends Controller
 
         // 出力値に設定
         $outPut = [];
-        $outPut['money'] = "";
-        $outPut['reward'] = "";
-        $outPut['rounding'] = "1";
-        $outPut['calc_list'] = [];
+        $outPut['money'] = "";              // 記事代
+        $outPut['reward'] = "";             // 特別報酬
+        $outPut['rounding'] = self::ROUND;  // 端数処理
+        $outPut['calc_list'] = [];          // 計算結果一覧
 
+        // Viewへ
         return view('kiji.index')->with($outPut);
     }
 
@@ -67,12 +68,12 @@ class KijiToolController extends Controller
             $reward_tax_10 = $this->calc_tax($reward, 10, $rounding);
         }
 
-        // 小計(8%) 【記事代 + 特別報酬 税抜き】
+        // 小計(8%) 【記事代 + 特別報酬】
         $subtotal_8 = ($money - $money_tax_8) + ($reward - $reward_tax_8);
         // 源泉徴収算出(8%)
         $withholding_tax_8 = $this->calc_withholding_tax($subtotal_8);
 
-        // 小計(10%) 【記事代 + 特別報酬 税抜き】
+        // 小計(10%) 【記事代 + 特別報酬】
         $subtotal_10 = ($money - $money_tax_10) + ($reward - $reward_tax_10);
         // 源泉徴収算出(8%)
         $withholding_tax_10 = $this->calc_withholding_tax($subtotal_10);
@@ -86,38 +87,47 @@ class KijiToolController extends Controller
         // 一覧定義
         $calc_list = [];
         $obj = new \stdClass();
-        $obj->tax_name = '8%';
-        $obj->money_tax = $money_tax_8;
-        $obj->reward_tax = $reward_tax_8;
-        $obj->subtotal = $subtotal_8;
-        $obj->subtotal_tax = $subtotal_tax_8;
-        $obj->withholding_tax = $withholding_tax_8;
+        $obj->tax_name = '8%';  // 税率
+        $obj->money_tax = $money_tax_8;             // 記事代消費税
+        $obj->reward_tax = $reward_tax_8;           // 特別報酬消費税
+        $obj->subtotal = $subtotal_8;               // 小計
+        $obj->subtotal_tax = $subtotal_tax_8;       // 小計消費税
+        $obj->withholding_tax = $withholding_tax_8; // 源泉税
         // 一覧に追加
         $calc_list[] = $obj;
 
         $obj = new \stdClass();
         $obj->tax_name = '10%';
-        $obj->money_tax = $money_tax_10;
-        $obj->reward_tax = $reward_tax_10;
-        $obj->subtotal = $subtotal_10;
-        $obj->subtotal_tax = $subtotal_tax_10;
-        $obj->withholding_tax = $withholding_tax_10;
+        $obj->money_tax = $money_tax_10;            // 記事代消費税
+        $obj->reward_tax = $reward_tax_10;          // 特別報酬消費税
+        $obj->subtotal = $subtotal_10;              // 小計
+        $obj->subtotal_tax = $subtotal_tax_10;      // 小計消費税
+        $obj->withholding_tax = $withholding_tax_10;// 源泉税
         // 一覧に追加
         $calc_list[] = $obj;
 
         // 出力値に設定
         $outPut = [];
-        $outPut['money'] = $money;
-        $outPut['reward'] = $reward;
-        $outPut['rounding'] = $rounding;
-        $outPut['calc_list'] = $calc_list;
+        $outPut['money'] = $money;          // 記事代
+        $outPut['reward'] = $reward;        // 特別報酬
+        $outPut['rounding'] = $rounding;    // 端数処理
+        $outPut['calc_list'] = $calc_list;  // 計算結果一覧
 
+        // Viewへ
         return view('kiji.index')->with($outPut);
     }
 
+    /**
+     * 消費税計算処理
+     * @param int $num 金額
+     * @param int $tax 税率
+     * @param string $round 端数処理
+     * @return int 計算結果
+     */
     private function calc_tax($num, $tax, $round) {
         // 税込み金額消費税計算
         $tax = $num / (1 + $tax / 100) * $tax / 100;
+
         // 四捨五入
         if ($round == self::ROUND) {
             $rounded_tax = round($tax);
@@ -125,14 +135,27 @@ class KijiToolController extends Controller
         } else if ($round == self::TRUNCATE) {
             $rounded_tax = floor($tax);
         }
+
+        // 返却
         return $rounded_tax;
     }
 
+    /**
+     * 源泉税計算処理(切り捨て)
+     * @param int $num 金額
+     * @return int 計算結果
+     */
     private function calc_withholding_tax($num) {
         // 切り捨て
         return floor($num * 20.42 / 100);
     }
 
+    /**
+     * 小計の消費税計算処理(切り捨て)
+     * @param int $num 金額
+     * @param int $tax 税率
+     * @return int 計算結果
+     */
     private function calc_subtotal_tax($num, $tax) {
         // 切り捨て
         return floor($num * $tax / 100);

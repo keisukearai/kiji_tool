@@ -5,6 +5,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>記事ツール</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <style>
+            .font_small {
+                font-size: 0.8rem;
+            }
+        </style>
     </head>
     <body>
         <div class="px-3 pt-3">
@@ -37,17 +42,17 @@
         {{-- 計算結果がある場合のみ表示 --}}
         @if (count($calc_list) > 0)
         <div class="px-3">
-            <table class="table table-bordered" style="width:80%;">
+            <table class="table table-bordered" style="width:90%;">
                 <thead class="table-light">
                     <tr>
-                        <th colspan="2">税率</th>
+                        <th colspan="2" style="width:20%;">税率</th>
                         <th>税抜き</th>
                         <th>消費税</th>
                         <th>税込み</th>
-                        <th>小計</th>
-                        <th>小計の消費税</th>
-                        <th>源泉税</th>
-                        <th>合計金額</th>
+                        <th style="width:12%;"><span class="font_small">(1)</span>小計<span class="px-1 font_small">税抜き(a)+(b)</span></th>
+                        <th style="width:12%;"><span class="font_small">(2)</span>小計<span class="px-1 font_small">消費税</span></th>
+                        <th style="width:12%;"><span class="font_small">(3)</span>源泉税<span class="px-1 font_small">(1)*20.42%</span></th>
+                        <th style="width:12%;">合計金額<span class="font_small"> (1)-(2)+(3)</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,7 +63,7 @@
                     @endphp
                     <tr>
                         <td rowspan="2" class="text-center">{{ $data->tax_name }}</td>
-                        <td>記事代</td>
+                        <td>記事代<span class="px-2" style="font-size:0.8rem;">(a)</span></td>
                         {{-- 税抜き --}}
                         <td class="text-end">{{ number_format($money - $data->money_tax) }}</td>
                         {{-- 消費税 --}}
@@ -75,7 +80,7 @@
                         <td rowspan="2" class="text-end">{{ number_format($total) }}</td>
                     </tr>
                     <tr>
-                        <td>特別報酬</td>
+                        <td>特別報酬<span class="px-2" style="font-size:0.8rem;">(b)</span></td>
                         {{-- 税抜き --}}
                         <td class="text-end">{{ number_format($reward - $data->reward_tax) }}</td>
                         {{-- 消費税 --}}
